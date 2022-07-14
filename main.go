@@ -15,19 +15,20 @@ func main() {
 	if err != nil {
 		log.Fatal("Error loading .env file")
 	}
+
 	serverAddresses := strings.Split(os.Getenv("SERVER_ADDRESSES"), ",")
-	
+	lbPort := os.Getenv("LOAD_BALANCER_ADDR")
 	servers := initiateNewServers(serverAddresses)
 
-	loadBalancer := NewLoadBalancer(":8080", servers)
+	loadBalancer := newLoadBalancer(lbPort, servers)
 	handleRedirect := func(w http.ResponseWriter, r *http.Request) {
 		loadBalancer.serveProxy(w, r)
 	}
 	go loadBalancer.runHealthCheck()
 
 	http.HandleFunc("/", handleRedirect)
-	fmt.Printf("Listening at localhost%s\n", loadBalancer.port)
-	if err := http.ListenAndServe(loadBalancer.port, nil); err != nil {
+	fmt.Printf("Listening at port %s\n", loadBalancer.port)
+	if err := http.ListenAndServe(":" + loadBalancer.port, nil); err != nil {
 		log.Fatalln(err.Error())
 	}
 }

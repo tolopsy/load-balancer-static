@@ -6,15 +6,15 @@ import (
 	"sync"
 )
 
-type LoadBalancer struct {
+type loadBalancer struct {
 	port            string
 	roundRobinCount int
 	mu              sync.Mutex
 	servers         []*server
 }
 
-func NewLoadBalancer(port string, servers []*server) *LoadBalancer {
-	return &LoadBalancer{
+func newLoadBalancer(port string, servers []*server) *loadBalancer {
+	return &loadBalancer{
 		port:            port,
 		roundRobinCount: 0,
 		mu:              sync.Mutex{},
@@ -22,7 +22,7 @@ func NewLoadBalancer(port string, servers []*server) *LoadBalancer {
 	}
 }
 
-func (l *LoadBalancer) getNextAvailableServer() *server {
+func (l *loadBalancer) getNextAvailableServer() *server {
 	serversCount := len(l.servers)
 	l.mu.Lock()
 	selectedServer := l.servers[l.roundRobinCount%serversCount]
@@ -36,7 +36,7 @@ func (l *LoadBalancer) getNextAvailableServer() *server {
 	return selectedServer
 }
 
-func (l *LoadBalancer) serveProxy(w http.ResponseWriter, r *http.Request) {
+func (l *loadBalancer) serveProxy(w http.ResponseWriter, r *http.Request) {
 	targetServer := l.getNextAvailableServer()
 	r.Header.Del("X-Forwarded-For") // to prevent IP spoofing
 

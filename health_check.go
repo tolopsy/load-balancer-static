@@ -22,7 +22,7 @@ func isAliveOrNot(u *url.URL) bool {
 	return true
 }
 
-func (l *LoadBalancer) healthCheck() {
+func (l *loadBalancer) healthCheck() {
 	for _, server := range l.servers {
 		pingURL, err := url.ParseRequestURI(server.addr)
 		if err != nil {
@@ -40,7 +40,7 @@ func (l *LoadBalancer) healthCheck() {
 	}
 }
 
-func (l *LoadBalancer) runHealthCheck() {
+func (l *loadBalancer) runHealthCheck() {
 	fmt.Println("Starting health check")
 	l.healthCheck()
 	for {
